@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurateur Renault MEGANE – Janvier 2021</title>
+<style>
+:root{--y:#ffcc33;--k:#1d1d1b;--g:#6b6b6b;--l:#f2f2f2;--w:#fff;--line:#dcdcdc}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.4 "Helvetica Neue",Arial,sans-serif;color:var(--k);background:var(--w)}
+header{display:flex;align-items:center;gap:16px;padding:12px 24px;border-bottom:1px solid var(--line)}
+.logo{font-weight:700;letter-spacing:.12em;font-size:18px}
+.logo i{display:inline-block;width:14px;height:22px;background:var(--y);margin-right:10px;transform:skewX(-8deg);vertical-align:-4px}
+header small{color:var(--g);margin-left:auto}
+main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);min-height:calc(100vh - 56px)}
+.stage{background:linear-gradient(#fafafa,#e9e9e9);padding:24px;display:flex;flex-direction:column}
+.stage h1{font-weight:300;font-size:30px}.stage h1 b{font-weight:700}
+.stage .sub{color:var(--g);margin-bottom:12px}
+.view{position:relative;flex:1;display:flex;align-items:center;justify-content:center;min-height:300px}
+.view>img{width:100%;max-width:900px;border-radius:2px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.insets{position:absolute;left:0;bottom:8px;display:flex;gap:10px}
+.insets figure{background:var(--w);border:1px solid var(--line);padding:4px;width:110px;font-size:11px;color:var(--g)}
+.insets img{width:100%;height:70px;object-fit:cover;display:block}
+.badge{position:absolute;right:0;top:0;background:var(--y);padding:4px 10px;font-size:12px;font-weight:700}
+.panel{border-left:1px solid var(--line);display:flex;flex-direction:column}
+nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav button{flex:1;white-space:nowrap;padding:14px 12px;border:0;background:none;font:inherit;cursor:pointer;border-bottom:3px solid transparent;color:var(--g)}
+nav button.on{color:var(--k);font-weight:700;border-color:var(--y)}
+.step{padding:20px 24px;flex:1;overflow:auto}
+.step h2{font-weight:300;font-size:22px;margin-bottom:14px}
+.card{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px;margin-bottom:8px;background:var(--w);border:1px solid var(--line);cursor:pointer;font:inherit}
+.card.on{border-color:var(--k);box-shadow:inset 0 0 0 1px var(--k)}
+.card img{width:84px;height:56px;object-fit:cover;flex:none}
+.card .t{flex:1}.card .t small{display:block;color:var(--g)}
+.dot{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);flex:none}
+.tag{font-size:11px;background:var(--l);padding:2px 6px;color:var(--g);white-space:nowrap}
+.tag.std{background:var(--y);color:var(--k)}
+.seg{display:flex;margin-bottom:16px}.seg button{flex:1;padding:10px;border:1px solid var(--line);background:var(--w);cursor:pointer;font:inherit}
+.seg button.on{background:var(--k);color:#fff;border-color:var(--k)}
+.chk{accent-color:#1d1d1b;width:18px;height:18px;flex:none}
+.foot{padding:14px 24px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:space-between;align-items:center}
+.btn{background:var(--y);border:0;padding:12px 22px;font:inherit;font-weight:700;cursor:pointer}
+.btn.alt{background:var(--l)}
+table{width:100%;border-collapse:collapse}td{padding:8px 0;border-bottom:1px solid var(--line);vertical-align:top}td:first-child{color:var(--g);width:38%}
+.note{font-size:12px;color:var(--g);margin-top:12px}
+@media(max-width:860px){main{grid-template-columns:1fr}.panel{border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header><div class="logo"><i></i>RENAULT</div><small>Configurateur MEGANE · Brochure janvier 2021</small></header>
+<main>
+  <section class="stage">
+    <h1>Renault <b>MEGANE</b> <span id="bodyTitle"></span></h1>
+    <div class="sub" id="subTitle"></div>
+    <div class="view"><div class="badge" id="badge"></div><img id="car" alt="Votre MEGANE"><div class="insets" id="insets"></div></div>
+  </section>
+  <section class="panel">
+    <nav id="nav"></nav>
+    <div class="step" id="step"></div>
+    <div class="foot"><button class="btn alt" id="prev">Précédent</button><button class="btn" id="next">Suivant</button></div>
+  </section>
+</main>
+
+<script>
+/* ===== DONNÉES (brochure Renault MEGANE, janvier 2021, pages 30-45) ===== */
+const COLORS=[
+ {id:"blanc-glacier",n:"Blanc Glacier",t:"Opaque vernis (série)",hex:"#f4f4f2"},
+ {id:"blanc-nacre",n:"Blanc Nacré",t:"Métallisée spéciale",hex:"#eeeae4"},
+ {id:"gris-highland",n:"Gris Highland",t:"Métallisée",hex:"#b8b8b6"},
+ {id:"gris-baltique",n:"Gris Baltique",t:"Métallisée",hex:"#8c9694"},
+ {id:"gris-titanium",n:"Gris Titanium",t:"Métallisée",hex:"#3e4a53"},
+ {id:"noir-etoile",n:"Noir Étoilé",t:"Métallisée",hex:"#16171a"},
+ {id:"bleu-iron",n:"Bleu Iron",t:"Métallisée",hex:"#1a5fb4"},
+ {id:"bleu-cosmos",n:"Bleu Cosmos",t:"Métallisée",hex:"#14307a"},
+ {id:"rouge-flamme",n:"Rouge Flamme",t:"Métallisée spéciale",hex:"#cc1f1f"},
+ {id:"cuivre-solar",n:"Cuivre Solar",t:"Métallisée spéciale – nouveauté",hex:"#8a5a44"}];
+const WHEELS={
+ "elliptik-16":"Jantes 16″ avec enjoliveurs Elliptik","limited-16":"Jantes alliage 16″ Limited",
+ "impulse-16":"Jantes alliage 16″ Impulse diamantées Gris Erbé","allium-17":"Jantes alliage 17″ Allium diamantées Gris Erbé",
+ "hightek-18":"Jantes alliage 18″ Hightek","montlhery-17":"Jantes alliage 17″ Montlhéry diamantées","magny-cours-18":"Jantes alliage 18″ Magny-Cours diamantées Gris Erbé"};
+const SEATS={
+ carbone:"Sellerie tissu Carbone",limited:"Sellerie tissu Noir et Gris à motif Limited",
+ mixte:"Sellerie mixte similicuir / tissu Carbone texturé",cuir:"Sellerie cuir* perforé Noir Titane",
+ alcantara:"Sellerie Alcantara® Gris Foncé, surpiqûres rouges R.S. Line"};
+const SPARE=[{id:"spare",l:"Roue de secours"},{id:"galette",l:"Roue de secours galette"}];
+const TRIMS={
+ zen:{n:"Zen",wheels:["elliptik-16"],seat:"carbone",
+  desc:"Écran 7″, tableau de bord numérique 7″, climatisation bi-zone, Full LED Pure Vision.",
+  opts:[{id:"techno",l:"Pack Techno",d:"EASY LINK 7″ navigation, services connectés, antibrouillard LED, rétros électriques rabattables, aide parking avant, caméra de recul"},
+        {id:"modul",l:"Pack Modularité",d:"Siège passager tablette, banquette 1/3-2/3 Easy Break, compartimentage coffre",estate:1},...SPARE]},
+ limited:{n:"SL Limited (Zen +)",wheels:["limited-16"],seat:"limited",
+  desc:"Zen + alerte de ligne, panneaux de signalisation, R-Call, MULTI-SENSE, frein de parking électrique.",
+  opts:[{id:"city",l:"Pack City",d:"Caméra de recul et projecteurs antibrouillard"},
+        {id:"techno",l:"Pack Techno",d:"EASY LINK 7″ navigation, services connectés, antibrouillard LED, rétros rabattables, aide parking avant, caméra"},
+        {id:"modul",l:"Pack Modularité",d:"Siège passager tablette, banquette Easy Break, compartimentage coffre",estate:1},...SPARE]},
+ intens:{n:"Intens (Zen +)",wheels:["impulse-16","allium-17","hightek-18"],seat:"mixte",
+  desc:"EASY LINK 9,3″, tableau de bord numérique 10,2″, freinage actif d’urgence, caméra de recul, Auto-Hold.",
+  opts:[{id:"hud",l:"Affichage tête haute"},{id:"bose",l:"Bose® Sound System (10 haut-parleurs)"},
+        {id:"roof",l:"Toit ouvrant électrique panoramique"},
+        {id:"conduite",l:"Pack Conduite",d:"Régulateur adaptatif et assistant de maintien dans la voie"},
+        {id:"cuir",l:"Pack Cuir*",d:"Sellerie cuir noir, sièges et volant chauffants, siège conducteur électrique massant"},
+        {id:"easydrive",l:"Pack Easy Drive",d:"Assistant autoroute et trafic, angle mort, Easy Park Assist, sortie de stationnement"},
+        {id:"easypark",l:"Pack Easy Park",d:"Détecteur d’angle mort, Easy Park Assist, avertisseur de sortie"},
+        {id:"hiver",l:"Pack Hiver",d:"Sièges avant chauffants et volant chauffant"},...SPARE]},
+ rsline:{n:"R.S. Line (Intens +)",wheels:["montlhery-17","magny-cours-18"],seat:"alcantara",
+  desc:"Lame F1, double canule, sièges sport Alcantara®, pédalier aluminium, volant cuir R.S. Line.",
+  opts:[{id:"hud",l:"Affichage tête haute"},{id:"spoiler",l:"Becquet arrière"},{id:"bose",l:"Bose® Sound System (10 haut-parleurs)"},
+        {id:"roof",l:"Toit ouvrant électrique panoramique"},
+        {id:"conduite",l:"Pack Conduite",d:"Régulateur adaptatif et assistant de maintien dans la voie"},
+        {id:"easydrive",l:"Pack Easy Drive",d:"Assistant autoroute et trafic, angle mort, Easy Park Assist"},
+        {id:"easypark",l:"Pack Easy Park",d:"Détecteur d’angle mort, Easy Park Assist, avertisseur de sortie"},...SPARE]}};
+const ENGINES=[
+ {id:"tce115",n:"TCe 115 FAP",d:"Essence · 115 ch · Manuelle · 190 km/h · 0-100 en 11 s"},
+ {id:"tce140",n:"TCe 140 FAP",d:"Essence · 140 ch · Manuelle · 205 km/h · 0-100 en 9,4 s"},
+ {id:"tce140edc",n:"TCe 140 EDC FAP",d:"Essence · 140 ch · Automatique double embrayage"},
+ {id:"tce160edc",n:"TCe 160 EDC FAP",d:"Essence · 160 ch · Automatique double embrayage · 0-100 en 9 s"},
+ {id:"dci115",n:"Blue dCi 115",d:"Diesel · 115 ch · Manuelle · 4,6 l/100 km (WLTP)"},
+ {id:"dci115edc",n:"Blue dCi 115 EDC",d:"Diesel · 115 ch · Automatique double embrayage"},
+ {id:"etech",n:"E-TECH Plug-in Hybride 160 ch",d:"Essence 1,6 + 2 moteurs électriques · jusqu’à 65 km en électrique · Estate uniquement",estate:1,trims:["intens","rsline"]}];
+const TRUNK={berline:{ess:"473 L",die:"394 L"},estate:{ess:"563 L",die:"504 L",etech:"447 L"}};
+
+/* ===== ÉTAT ===== */
+const S={body:"berline",trim:"intens",engine:"tce140",color:"cuivre-solar",wheel:"impulse-16",opts:new Set(),step:0};
+const STEPS=["Modèle","Finition","Motorisation","Couleur","Jantes","Sellerie","Options","Récapitulatif"];
+const $=id=>document.getElementById(id);
+const trim=()=>TRIMS[S.trim], color=()=>COLORS.find(c=>c.id===S.color);
+const seatId=()=>S.opts.has("cuir")?"cuir":trim().seat;
+const engines=()=>ENGINES.filter(e=>(!e.estate||S.body==="estate")&&(!e.trims||e.trims.includes(S.trim)));
+function sanitize(){
+  if(!trim().wheels.includes(S.wheel))S.wheel=trim().wheels[0];
+  if(!engines().find(e=>e.id===S.engine))S.engine=engines()[1].id;
+  const ok=new Set(trim().opts.filter(o=>!o.estate||S.body==="estate").map(o=>o.id));
+  [...S.opts].forEach(o=>{if(!ok.has(o))S.opts.delete(o)});
+  if(S.opts.has("spare")&&S.opts.has("galette"))S.opts.delete("galette");
+  if(S.engine==="etech")S.opts.delete("spare"),S.opts.delete("galette");
+}
+
+/* ===== RENDU ===== */
+const card=(on,img,title,sub,tag,fn,cls="")=>{const b=document.createElement("button");b.className="card"+(on?" on":"");
+  b.innerHTML=(img?`<img src="${img}" alt="">`:"")+`<span class="t">${title}${sub?`<small>${sub}</small>`:""}</span>${tag?`<span class="tag ${cls}">${tag}</span>`:""}`;b.onclick=fn;return b};
+function stage(){
+  const el=$("car"),c=color();
+  const render=`assets/renders/${S.body}_${S.trim}_${S.color}_${S.wheel}.jpg`;
+  el.onerror=()=>{el.onerror=null;el.src=`assets/colors/${S.color}.jpg`};
+  el.src=render;
+  $("bodyTitle").textContent=S.body==="estate"?"Estate":"Berline";
+  $("subTitle").textContent=`${trim().n} · ${ENGINES.find(e=>e.id===S.engine).n} · ${c.n}`;
+  $("badge").textContent=trim().n;
+  $("insets").innerHTML=`<figure><img src="assets/wheels/${S.wheel}.jpg" alt=""><span>${WHEELS[S.wheel].replace("Jantes ","").slice(0,28)}</span></figure><figure><img src="assets/seats/${seatId()}.jpg" alt=""><span>${SEATS[seatId()].slice(0,28)}</span></figure>`;
+}
+function step(){
+  const el=$("step");el.innerHTML="";const h=document.createElement("h2");h.textContent=STEPS[S.step];el.append(h);
+  if(S.step===0){const s=document.createElement("div");s.className="seg";
+    ["berline","estate"].forEach(b=>{const x=document.createElement("button");x.textContent=b==="berline"?"Berline":"Estate";x.className=S.body===b?"on":"";x.onclick=()=>{S.body=b;update()};s.append(x)});
+    el.append(s);const p=document.createElement("p");
+    p.textContent=S.body==="estate"?"Silhouette de break : coffre jusqu’à 563 L (447 L en hybride), chargement jusqu’à 2,70 m, barres de toit chromées, E-TECH Plug-in Hybride disponible.":"Berline 5 portes : 4,359 m, coffre 473 L (essence) / 394 L (diesel), 1 367 L banquette rabattue.";
+    el.append(p)}
+  if(S.step===1)Object.entries(TRIMS).forEach(([k,t])=>el.append(card(S.trim===k,"",t.n,t.desc,"",()=>{S.trim=k;update()})));
+  if(S.step===2)engines().forEach(e=>el.append(card(S.engine===e.id,"",e.n,e.d,"",()=>{S.engine=e.id;update()})));
+  if(S.step===3)COLORS.forEach(c=>{const b=card(S.color===c.id,"",c.n,c.t,"",()=>{S.color=c.id;update()});
+    const d=document.createElement("span");d.className="dot";d.style.background=c.hex;b.prepend(d);el.append(b)});
+  if(S.step===4)trim().wheels.forEach((w,i)=>el.append(card(S.wheel===w,`assets/wheels/${w}.jpg`,WHEELS[w],"",i===0?"Série":"Option",()=>{S.wheel=w;update()},i===0?"std":"")));
+  if(S.step===5){const id=seatId();el.append(card(true,`assets/seats/${id}.jpg`,SEATS[id],S.opts.has("cuir")?"Via Pack Cuir":"De série sur cette finition","","" ));
+    const p=document.createElement("p");p.className="note";p.textContent="* Cuir d’origine bovine. Sellerie en cuir : partie cuir véritable, partie textile enduit (selon brochure).";el.append(p)}
+  if(S.step===6){trim().opts.filter(o=>!o.estate||S.body==="estate").forEach(o=>{
+      if((o.id==="spare"||o.id==="galette")&&S.engine==="etech")return;
+      const b=card(S.opts.has(o.id),"",o.l,o.d||"","",()=>{S.opts.has(o.id)?S.opts.delete(o.id):S.opts.add(o.id);if(o.id==="spare")S.opts.delete("galette");if(o.id==="galette")S.opts.delete("spare");update()});
+      const c=document.createElement("input");c.type="checkbox";c.className="chk";c.checked=S.opts.has(o.id);b.prepend(c);el.append(b)});
+    const n=document.createElement("p");n.className="note";n.textContent="Roue de secours incompatible avec l’E-TECH Plug-in Hybride.";el.append(n)}
+  if(S.step===7){const e=ENGINES.find(x=>x.id===S.engine),t=S.engine==="etech"?"etech":(e.n.includes("dCi")?"die":"ess");
+    const names=[...S.opts].map(id=>trim().opts.find(o=>o.id===id)?.l).filter(Boolean);
+    const rows=[["Modèle","Renault MEGANE "+(S.body==="estate"?"Estate":"Berline")],["Finition",trim().n],["Motorisation",e.n],["Couleur",`${color().n} (${color().t})`],
+      ["Jantes",WHEELS[S.wheel]],["Sellerie",SEATS[seatId()]],["Options",names.length?names.join(", "):"Aucune"],["Volume de coffre",TRUNK[S.body][t]||"—"]];
+    const tb=document.createElement("table");tb.innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("");el.append(tb);
+    const p=document.createElement("p");p.className="note";p.textContent="La brochure ne contient aucun tarif : aucun prix n’est affiché.";el.append(p)}
+}
+function nav(){const n=$("nav");n.innerHTML="";STEPS.forEach((s,i)=>{const b=document.createElement("button");b.textContent=s;b.className=i===S.step?"on":"";b.onclick=()=>{S.step=i;update()};n.append(b)});
+  $("prev").style.visibility=S.step?"visible":"hidden";$("next").style.visibility=S.step<STEPS.length-1?"visible":"hidden"}
+function update(){sanitize();stage();nav();step();history.replaceState(null,"","#"+btoa(JSON.stringify({...S,opts:[...S.opts]})))}
+$("prev").onclick=()=>{S.step--;update()};$("next").onclick=()=>{S.step++;update()};
+try{if(location.hash.length>1){const x=JSON.parse(atob(location.hash.slice(1)));Object.assign(S,x,{opts:new Set(x.opts)})}}catch(e){}
+update();
+</script>
+</body>
+</html>
